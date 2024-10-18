@@ -29,10 +29,12 @@ import { PermissionSeeder } from './database/seeds/permission.seed';
 })
 export class AppModule {
   constructor(
-    private roleSeeder: RoleSeeder,
-    private permisisonSeeder: PermissionSeeder,
-  ) {
+    private readonly roleSeeder: RoleSeeder,
+    private readonly permissionSeeder: PermissionSeeder,
+  ) {}
+
+  onModuleInit() {
     this.roleSeeder.seed();
-    this.permisisonSeeder.seed();
+    this.permissionSeeder.seed();
   }
 }

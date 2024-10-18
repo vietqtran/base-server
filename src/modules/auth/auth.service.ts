@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as argon2 from 'argon2';
 import { SignUpDto } from './dtos/sign-up.dto';
@@ -13,7 +13,7 @@ export class AuthService {
 
     async signUp(signUpDto: SignUpDto) {
         const user = await this.usersService.findOne({email: signUpDto.email});
-        if (user) throw new Error('User already exists');
+        if (user) throw new HttpException('User already exists', HttpStatus.CONFLICT);
         const hashedPassword = await argon2.hash(signUpDto.password);
         const createdUser = await this.usersService.create({
             username: signUpDto.username,
