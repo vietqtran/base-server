@@ -31,7 +31,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     async validate(req: Request, payload: TokenPayload) {
         const refreshToken = JwtRefreshStrategy.extractJWT(req)
         if (!refreshToken) throw new UnauthorizedException('Refresh token malformed.')
-        const user = await this.usersService.findOne(payload.sub)
+        const user = await this.usersService.findOne({ _id: payload.sub })
         const isValid = await this.jwtService.verify(refreshToken, {
             secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         })

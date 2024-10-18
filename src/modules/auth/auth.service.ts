@@ -12,7 +12,7 @@ export class AuthService {
     constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, private readonly configService: ConfigService) {}
 
     async signUp(signUpDto: SignUpDto) {
-        const user = await this.usersService.findOne(signUpDto.email);
+        const user = await this.usersService.findOne({email: signUpDto.email});
         if (user) throw new Error('User already exists');
         const hashedPassword = await argon2.hash(signUpDto.password);
         const createdUser = await this.usersService.create({

@@ -1,5 +1,6 @@
 import { Session } from '@/modules/sessions/schemas/session.schema';
 import { SocialLogin } from '@/modules/social-login/schemas/social-login.schema';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsString, ValidateNested } from 'class-validator';
@@ -10,20 +11,21 @@ import { Document, Types } from 'mongoose';
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   },
+  versionKey: false,
 })
 export class User extends Document {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   @IsString()
   username: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   @IsString()
   email: string;
 
   @Prop({ required: true })
   @IsString()
   password_hash: string;
-  
+
   @Prop({ required: true })
   @IsString()
   roles: string;
@@ -35,14 +37,6 @@ export class User extends Document {
   @Prop({ required: true, default: false })
   @IsBoolean()
   is_verified?: boolean;
-
-  @Prop({ required: true })
-  @IsDate()
-  created_at: Date;
-
-  @Prop({ required: true })
-  @IsDate()
-  updated_at: Date;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Session' }] })
   @ValidateNested()

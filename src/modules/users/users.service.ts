@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import * as argon2 from 'argon2';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -9,9 +9,9 @@ import { CreateUserDto } from './dtos/create-user.dto';
 export class UsersService {
     constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
-    async findOne(_id: string) {
+    async findOne(filterQuery: FilterQuery<User>) {
         try {
-            return await this.userModel.findOne({ _id }).exec();
+            return await this.userModel.findOne(filterQuery).exec();
         } catch (error) {
             console.log(error);
             return null;
