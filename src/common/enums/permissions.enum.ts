@@ -1,0 +1,7 @@
+export enum PERMISSIONS {
+  CREATE_USER = 1,
+  UPDATE_USER = 2,
+  DELETE_USER = 3,
+  VIEW_REPORTS = 4,
+  MANAGE_ROLES = 5,
+}
