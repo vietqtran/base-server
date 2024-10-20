@@ -1,10 +1,11 @@
+import { BaseSchema } from '@/common/base/schema.base';
+import { ROLES_IDS } from '@/constants/roles.constant';
 import { Session } from '@/modules/sessions/schemas/session.schema';
 import { SocialLogin } from '@/modules/social-login/schemas/social-login.schema';
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsString, ValidateNested } from 'class-validator';
-import { Document, Types } from 'mongoose';
+import { IsArray, IsBoolean, IsString, ValidateNested } from 'class-validator';
+import { Types } from 'mongoose';
 
 @Schema({
   timestamps: {
@@ -13,7 +14,7 @@ import { Document, Types } from 'mongoose';
   },
   versionKey: false,
 })
-export class User extends Document {
+export class User extends BaseSchema {
   @Prop({ required: true, unique: true })
   @IsString()
   username: string;
@@ -26,9 +27,10 @@ export class User extends Document {
   @IsString()
   password_hash: string;
 
-  @Prop({ required: true })
-  @IsString()
-  roles: string;
+  @Prop({ required: true, default: [ROLES_IDS.USER] })
+  @IsArray()
+  @IsString({ each: true })
+  roles: string[];
 
   @Prop({ required: true, default: true })
   @IsBoolean()
