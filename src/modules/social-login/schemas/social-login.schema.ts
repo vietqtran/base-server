@@ -1,7 +1,7 @@
 import { User } from '@/modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsDate, IsString } from 'class-validator';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({
   timestamps: {
@@ -9,7 +9,7 @@ import { Document, Types } from 'mongoose';
     updatedAt: 'updated_at',
   },
 })
-export class SocialLogin extends Document {
+export class SocialLogin {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   user: User;
 
