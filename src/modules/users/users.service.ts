@@ -12,7 +12,12 @@ export class UsersService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    const users = await this.userModel.find().exec();
+    const users = await this.userModel
+      .find()
+      .select(
+        '-password_hash -sessions -social_logins -is_active -is_verified -roles',
+      )
+      .exec();
     return users;
   }
 
@@ -46,6 +51,12 @@ export class UsersService {
         password_hash: createUserDto.password_hash,
         roles: createUserDto.roles,
       });
+      user.password_hash = undefined;
+      user.roles = [];
+      user.sessions = undefined;
+      user.social_logins = undefined;
+      user.is_active = undefined;
+      user.is_verified = undefined;
       return user;
     } catch (error) {
       console.log(error);

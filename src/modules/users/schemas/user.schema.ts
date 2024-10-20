@@ -3,7 +3,7 @@ import { ROLES_IDS } from '@/constants/roles.constant';
 import { Session } from '@/modules/sessions/schemas/session.schema';
 import { SocialLogin } from '@/modules/social-login/schemas/social-login.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsString, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
 
