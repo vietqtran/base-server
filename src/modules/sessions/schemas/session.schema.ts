@@ -28,3 +28,5 @@ export class Session {
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
+
+SessionSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 });
