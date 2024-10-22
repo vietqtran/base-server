@@ -1,4 +1,4 @@
-import { SEND_MAIL } from '@/mail/constants/mail.constant';
+import { DECORATOR_KEYS } from '@/constants/common';
 import { InjectQueue } from '@nestjs/bullmq';
 
-export const InjectSendMailQueue = () => InjectQueue(SEND_MAIL);
+export const InjectSendMailQueue = () => InjectQueue(DECORATOR_KEYS.SEND_MAIL);

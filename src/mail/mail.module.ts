@@ -5,14 +5,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { MAIL_QUEUE, SEND_MAIL } from './constants/mail.constant';
 import { SendMailProcessor } from '@/common/processors/send-mail.processor';
+import { DECORATOR_KEYS, QUEUES } from '@/constants/common';
 
 @Module({
   imports: [
     QueueModule.register({
-      queues: [SEND_MAIL],
-      flows: [MAIL_QUEUE],
+      queues: [DECORATOR_KEYS.SEND_MAIL],
+      flows: [QUEUES.MAIL_QUEUE],
     }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
