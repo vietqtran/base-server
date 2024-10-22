@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsInt, IsString } from 'class-validator';
-import { Document } from 'mongoose';
 
 @Schema()
-export class Permission extends Document {
+export class Permission {
   @Prop({ required: true })
   @IsInt()
   id: number;
