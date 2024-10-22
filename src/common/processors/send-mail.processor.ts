@@ -4,9 +4,9 @@ import { Job } from 'bullmq';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Processor } from '@nestjs/bullmq';
 import { WorkerHostProcessor } from './worker-host.processor';
-import { SEND_MAIL } from '@/mail/constants/mail.constant';
+import { DECORATOR_KEYS } from '@/constants/common';
 
-@Processor(SEND_MAIL)
+@Processor(DECORATOR_KEYS.SEND_MAIL)
 @Injectable()
 export class SendMailProcessor extends WorkerHostProcessor {
   constructor(private readonly mailerService: MailerService) {
@@ -15,7 +15,7 @@ export class SendMailProcessor extends WorkerHostProcessor {
 
   async process(job: Job) {
     console.log('processor', job.data);
-    if (job.name === SEND_MAIL) {
+    if (job.name === DECORATOR_KEYS.SEND_MAIL) {
       await this.mailerService.sendMail(job.data);
     }
     throw new BadRequestException(`Unknown job name: ${job.name}`);

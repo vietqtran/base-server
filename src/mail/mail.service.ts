@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { SendMailDto } from './dtos/send-mail.dto';
 import { InjectSendMailQueue } from '@/common/decorators/send-mail.decorator';
-import { SEND_MAIL } from './constants/mail.constant';
+import { DECORATOR_KEYS } from '@/constants/common';
 
 @Injectable()
 export class MailService {
@@ -22,6 +22,6 @@ export class MailService {
       context,
     };
     console.log('sendMailPayload', sendMailPayload);
-    await this.mailQueue.add(SEND_MAIL, sendMailPayload);
+    await this.mailQueue.add(DECORATOR_KEYS.SEND_MAIL, sendMailPayload);
   }
 }
