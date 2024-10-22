@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/modules/users/users.service';
 import { TokenPayload } from '../interfaces/token-payload.interface';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -34,12 +35,18 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(req: Request, payload: TokenPayload) {
     const refreshToken = JwtRefreshStrategy.extractJWT(req);
     if (!refreshToken)
-      throw new UnauthorizedException('Refresh token malformed.');
+      throw new CustomHttpException('Missing refresh token', 400, {
+        refreshToken: ['Missing refresh token'],
+      });
     const user = await this.usersService.findOne({ _id: payload.sub });
     const isValid = await this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
-    if (!isValid) throw new UnauthorizedException('Invalid refresh token');
+    if (!isValid) {
+      throw new CustomHttpException('Invalid refresh token', 401, {
+        refreshToken: ['Invalid refresh token'],
+      });
+    }
     return user;
   }
 }

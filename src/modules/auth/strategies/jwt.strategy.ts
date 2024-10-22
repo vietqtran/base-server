@@ -1,10 +1,16 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { ConfigService } from '@nestjs/config';
-import { HttpException, Injectable } from '@nestjs/common';
+import {
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { UsersService } from 'src/modules/users/users.service';
 import { TokenPayload } from '../interfaces/token-payload.interface';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,7 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: TokenPayload) {
     const user = await this.userService.findOne({ _id: payload.sub });
-    if (!user) throw new HttpException('Invalid token', 401);
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
     return user;
   }
 }
