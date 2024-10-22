@@ -79,4 +79,21 @@ export class UsersService {
       return null;
     }
   }
+
+  async findOneAndUpdate(userId: string, filter: FilterQuery<User>) {
+    try {
+      const user = await this.userModel.findOne({ _id: userId }).exec();
+      if (!user) {
+        throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
+          email: ['Email not found'],
+        });
+      }
+      return await this.userModel
+        .findOneAndUpdate({ _id: userId }, filter)
+        .exec();
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }
