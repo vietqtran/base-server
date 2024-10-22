@@ -11,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { TokenService } from '@/helpers/token.service';
 import { SessionsModule } from '../sessions/sessions.module';
+import { MailModule } from '@/mail/mail.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SessionsModule } from '../sessions/sessions.module';
       }),
     }),
     SessionsModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [

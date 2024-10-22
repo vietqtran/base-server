@@ -7,6 +7,9 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_USERNAME=${REDIS_USERNAME}
+      - REDIS_PASSWPRD=${REDIS_PASSWPRD}
     volumes:
       - redis_data:/data
 
