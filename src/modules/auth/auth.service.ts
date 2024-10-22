@@ -9,6 +9,8 @@ import { ClientSession, Model } from 'mongoose';
 import { CreateUserDto } from '../users/dtos/create-user.dto';
 import { TokenService } from '@/helpers/token.service';
 import { SessionsService } from '../sessions/sessions.service';
+import { MailService } from '@/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 export interface AuthResponse {
   user: Partial<User>;
@@ -23,6 +25,8 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly sessionService: SessionsService,
     private readonly transactionService: TransactionService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
@@ -59,6 +63,15 @@ export class AuthService {
         },
         session,
       );
+
+      await this.mailService.sendMail({
+        context: {
+          name: user.username,
+        },
+        subject: `Welcome to ${this.configService.get<string>('APP_NAME')}`,
+        template: 'welcome',
+        to: user.email,
+      });
 
       return this.sanitizeUser(user);
     });
