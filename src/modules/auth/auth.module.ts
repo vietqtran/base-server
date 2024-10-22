@@ -14,9 +14,7 @@ import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-    ]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -27,7 +25,7 @@ import { SessionsModule } from '../sessions/sessions.module';
         },
       }),
     }),
-    SessionsModule
+    SessionsModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -36,7 +34,7 @@ import { SessionsModule } from '../sessions/sessions.module';
     JwtStrategy,
     JwtRefreshStrategy,
     TransactionService,
-    TokenService
+    TokenService,
   ],
 })
 export class AuthModule {}

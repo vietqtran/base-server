@@ -14,9 +14,14 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     const users = await this.userModel
-      .find()
-      .select(
-        '-password_hash -sessions -social_logins -is_active',
+      .find(
+        {},
+        {
+          password_hash: 0,
+          sessions: 0,
+          social_logins: 0,
+          is_verified: 0,
+        },
       )
       .exec();
     return users;
