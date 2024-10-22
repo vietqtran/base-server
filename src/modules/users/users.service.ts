@@ -52,11 +52,9 @@ export class UsersService {
         roles: createUserDto.roles,
       });
       user.password_hash = undefined;
-      user.roles = [];
       user.sessions = undefined;
       user.social_logins = undefined;
       user.is_active = undefined;
-      user.is_verified = undefined;
       return user;
     } catch (error) {
       console.log(error);
