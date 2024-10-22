@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import * as argon2 from 'argon2';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 
 @Injectable()
 export class UsersService {
@@ -33,9 +34,21 @@ export class UsersService {
   async validateUser(email: string, password: string) {
     try {
       const user = await this.userModel.findOne({ email }).exec();
-      if (!user) throw new Error('User not found');
+      if (!user) {
+        throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
+          email: ['Email not found'],
+        });
+      }
       const isValid = await argon2.verify(password, user.password_hash);
-      if (!isValid) throw new Error('Invalid password');
+      if (!isValid) {
+        throw new CustomHttpException(
+          'Invalid password',
+          HttpStatus.UNAUTHORIZED,
+          {
+            password: ['Invalid password'],
+          },
+        );
+      }
       return user;
     } catch (error) {
       console.log(error);

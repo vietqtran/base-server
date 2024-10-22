@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as argon2 from 'argon2';
 import { SignUpDto } from './dtos/sign-up.dto';
@@ -6,6 +6,7 @@ import { TokenPayload } from './interfaces/token-payload.interface';
 import { User } from '../users/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +16,43 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  async login(email: string, password: string) {
+    const user = await this.usersService.validateUser(email, password);
+    if (!user) {
+      throw new CustomHttpException(
+        'Invalid credentials',
+        HttpStatus.UNAUTHORIZED,
+        {
+          email: ['Invalid credentials'],
+        },
+      );
+    }
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+    return { accessToken, refreshToken };
+  }
+
   async signUp(signUpDto: SignUpDto) {
-    const user = await this.usersService.findOne({
-      $or: [{ email: signUpDto.email }, { username: signUpDto.username }],
-    });
-    if (user) {
-      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    const { email, username } = signUpDto;
+    const existedEmail = await this.usersService.findOne({ email });
+    if (existedEmail) {
+      throw new CustomHttpException(
+        'User already exists',
+        HttpStatus.BAD_REQUEST,
+        {
+          email: ['Email is already taken'],
+        },
+      );
+    }
+    const existedUsername = await this.usersService.findOne({ username });
+    if (existedUsername) {
+      throw new CustomHttpException(
+        'User already exists',
+        HttpStatus.BAD_REQUEST,
+        {
+          username: ['Username is already taken'],
+        },
+      );
     }
     const hashedPassword = await argon2.hash(signUpDto.password);
     const createdUser = await this.usersService.create({
@@ -30,14 +62,7 @@ export class AuthService {
       roles: signUpDto.roles,
     });
 
-    const accessToken = await this.generateAccessToken(createdUser);
-    const refreshToken = await this.generateRefreshToken(createdUser);
-
-    return {
-      user: createdUser,
-      accessToken,
-      refreshToken,
-    };
+    return createdUser;
   }
 
   async generateAccessToken(user: User) {

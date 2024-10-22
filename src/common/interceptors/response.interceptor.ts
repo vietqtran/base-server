@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
@@ -21,24 +22,28 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
       catchError((error: any) => {
         let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
         let message = 'An unexpected error occurred';
+        let cause = undefined;
 
         if (error instanceof HttpException) {
           statusCode = error.getStatus();
-          const response = error.getResponse();
+          const response = error.getResponse() as any;
           message =
             typeof response === 'string'
               ? response
-              : response['message'] || message;
+              : response.message || message;
+          cause = response.cause;
         } else if (error instanceof Error) {
           message = error.message;
         }
 
-        context.switchToHttp().getResponse().status(statusCode);
+        const httpResponse = context.switchToHttp().getResponse<Response>();
+        httpResponse.status(statusCode);
 
         return Promise.resolve({
           data: null,
           status: 'error',
           message,
+          cause,
         });
       }),
     );
