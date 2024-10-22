@@ -25,10 +25,10 @@ export class AuthService {
     private readonly transactionService: TransactionService,
   ) {}
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async signIn(email: string, password: string): Promise<AuthResponse> {
     const user = await this.validateUser(email, password);
     const sanitizedUser = this.sanitizeUser(user);
-    
+
     const [accessToken, refreshToken] = await Promise.all([
       this.tokenService.generateAccessToken(user),
       this.tokenService.generateRefreshToken(user),
@@ -49,21 +49,24 @@ export class AuthService {
 
   async signUp(signUpDto: SignUpDto): Promise<Partial<User>> {
     await this.validateUniqueFields(signUpDto);
-    
+
     return this.transactionService.executeInTransaction(async (session) => {
       const hashedPassword = await argon2.hash(signUpDto.password);
-      const user = await this.createUser({
-        ...signUpDto,
-        password_hash: hashedPassword,
-      }, session);
-      
+      const user = await this.createUser(
+        {
+          ...signUpDto,
+          password_hash: hashedPassword,
+        },
+        session,
+      );
+
       return this.sanitizeUser(user);
     });
   }
 
   private async validateUniqueFields(signUpDto: SignUpDto): Promise<void> {
     const { email, username } = signUpDto;
-    
+
     const [existingEmail, existingUsername] = await Promise.all([
       this.userModel.findOne({ email }),
       this.userModel.findOne({ username }),
@@ -87,20 +90,22 @@ export class AuthService {
   }
 
   private async createUser(
-    createUserDto: CreateUserDto, 
-    session?: ClientSession
+    createUserDto: CreateUserDto,
+    session?: ClientSession,
   ): Promise<User> {
     try {
       const user = await this.userModel.create(
-        [{
-          username: createUserDto.username,
-          email: createUserDto.email,
-          password_hash: createUserDto.password_hash,
-          roles: createUserDto.roles,
-        }],
-        { session }
+        [
+          {
+            username: createUserDto.username,
+            email: createUserDto.email,
+            password_hash: createUserDto.password_hash,
+            roles: createUserDto.roles,
+          },
+        ],
+        { session },
       );
-      
+
       return user[0];
     } catch (error) {
       throw new CustomHttpException(
@@ -112,13 +117,11 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userModel.findOne({ email }).exec();
-    
+
     if (!user) {
-      throw new CustomHttpException(
-        'User not found',
-        HttpStatus.NOT_FOUND,
-        { email: ['Email not found'] },
-      );
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
+        email: ['Email not found'],
+      });
     }
 
     const isValid = await argon2.verify(user.password_hash, password);
@@ -139,7 +142,7 @@ export class AuthService {
     sanitizedUser.sessions = undefined;
     sanitizedUser.social_logins = undefined;
     sanitizedUser.is_active = undefined;
-    
+
     return sanitizedUser;
   }
 }

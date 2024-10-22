@@ -1,12 +1,12 @@
-import { TokenPayload } from "@/modules/auth/interfaces/token-payload.interface";
-import { User } from "@/modules/users/schemas/user.schema";
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+import { TokenPayload } from '@/modules/auth/interfaces/token-payload.interface';
+import { User } from '@/modules/users/schemas/user.schema';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 export interface TokenConfig {
-    secret?: string;
-    expiresIn?: string;
+  secret?: string;
+  expiresIn?: string;
 }
 
 @Injectable()
