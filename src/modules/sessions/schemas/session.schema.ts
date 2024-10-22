@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   },
+  versionKey: false,
 })
 export class Session {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })

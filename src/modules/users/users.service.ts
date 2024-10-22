@@ -16,7 +16,7 @@ export class UsersService {
     const users = await this.userModel
       .find()
       .select(
-        '-password_hash -sessions -social_logins -is_active -is_verified -roles',
+        '-password_hash -sessions -social_logins -is_active',
       )
       .exec();
     return users;

@@ -7,6 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/modules/users/users.service';
 import { TokenPayload } from '../interfaces/token-payload.interface';
 import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
+import { Model } from 'mongoose';
+import { User } from '@/modules/users/schemas/user.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -16,7 +19,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {
     super({
       jwtFromRequest: JwtRefreshStrategy.extractJWT,
@@ -38,7 +41,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       throw new CustomHttpException('Missing refresh token', 400, {
         refreshToken: ['Missing refresh token'],
       });
-    const user = await this.usersService.findOne({ _id: payload.sub });
+    const user = await this.userModel.findOne({ _id: payload.sub });
     const isValid = await this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
