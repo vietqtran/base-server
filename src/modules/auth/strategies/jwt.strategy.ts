@@ -11,12 +11,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { UsersService } from 'src/modules/users/users.service';
 import { TokenPayload } from '../interfaces/token-payload.interface';
 import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from '@/modules/users/schemas/user.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userService: UsersService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -26,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenPayload) {
-    const user = await this.userService.findOne({ _id: payload.sub });
+    const user = await this.userModel.findOne({ _id: payload.sub });
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
     }

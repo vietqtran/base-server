@@ -6,11 +6,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { UsersModule } from '../users/users.module';
+import { TransactionService } from '@/helpers/transaction.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import { TokenService } from '@/helpers/token.service';
+import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
   imports: [
-    UsersModule,
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -21,8 +27,16 @@ import { UsersModule } from '../users/users.module';
         },
       }),
     }),
+    SessionsModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtRefreshStrategy,
+    TransactionService,
+    TokenService
+  ],
 })
 export class AuthModule {}
