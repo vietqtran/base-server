@@ -1,24 +1,54 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from '@/config/database.config';
-import { DatabaseModule } from '@/database/database.module';
 import { RolesModule } from '@/modules/roles/roles.module';
 import { SessionsModule } from '@/modules/sessions/sessions.module';
 import { SocialLoginModule } from '@/modules/social-login/social-login.module';
 import { PermissionsModule } from '@/modules/permissions/permissions.module';
 import { RoleSeeder } from '@/database/seeds/roles.seed';
 import { PermissionSeeder } from '@/database/seeds/permission.seed';
+import { BullModule } from '@nestjs/bullmq';
+import redisConfig from './config/redis.config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MailModule } from './mail/mail.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [databaseConfig],
+      load: [databaseConfig, redisConfig],
       isGlobal: true,
       expandVariables: true,
     }),
-    DatabaseModule,
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('redis.host'),
+          port: configService.get('redis.port'),
+          username: configService.get('redis.username'),
+          password: configService.get('redis.password'),
+          url: configService.get('redis.url'),
+        },
+        defaultJobOptions: {
+          removeOnComplete: 1000,
+          removeOnFail: 5000,
+          attempts: 0,
+        },
+      }),
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const uri = configService.get<string>('database.uri');
+        return { uri };
+      },
+      inject: [ConfigService],
+    }),
+    MailModule,
+    QueueModule,
     AuthModule,
     UsersModule,
     RolesModule,
