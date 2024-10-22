@@ -1,15 +1,16 @@
 import { User } from '@/modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsDate, IsString } from 'class-validator';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({
   timestamps: {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   },
+  versionKey: false,
 })
-export class Session extends Document {
+export class Session {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   user: User;
 
@@ -27,3 +28,5 @@ export class Session extends Document {
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
+
+SessionSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 });

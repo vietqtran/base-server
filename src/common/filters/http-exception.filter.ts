@@ -1,11 +1,18 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+
+interface ErrorResponse {
+  data: null;
+  status: 'error';
+  message: string;
+  cause?: Record<string, any>;
+}
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -14,20 +21,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception.getStatus();
-    const exceptionResponse = exception.getResponse();
+    const statusCode = exception.getStatus();
+    const exceptionResponse = exception.getResponse() as any;
 
     this.logger.error(
       `HttpException caught: ${exception.message}`,
       exception.stack,
     );
 
-    response.status(status).json({
-      statusCode: status,
+    const errorResponse: ErrorResponse = {
+      data: null,
+      status: 'error',
       message:
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : (exceptionResponse as any).message,
-    });
+          : exceptionResponse.message || 'An error occurred',
+      cause: exceptionResponse.cause,
+    };
+
+    response.status(statusCode).json(errorResponse);
   }
 }
