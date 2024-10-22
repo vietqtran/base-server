@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 import * as argon2 from 'argon2';
 import { Session } from './schemas/session.schema';
@@ -46,13 +47,9 @@ export class SessionsService {
         { upsert: true, new: true },
       );
 
-      await this.userModel.findByIdAndUpdate(
-        userId,
-        {
-          $addToSet: { sessions: session },
-        },
-        { new: true },
-      );
+      await this.userModel.findByIdAndUpdate(userId, {
+        $addToSet: { sessions: session },
+      });
 
       return session;
     } catch (error) {
@@ -60,27 +57,67 @@ export class SessionsService {
     }
   }
 
-  async cleanupExpiredSessions(userId: string): Promise<void> {
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async cleanupExpiredSessions() {
     try {
-      // Find expired sessions
       const expiredSessions = await this.sessionModel.find({
-        user: userId,
         expires_at: { $lt: new Date() },
       });
 
-      if (expiredSessions.length > 0) {
-        const expiredSessionIds = expiredSessions.map((session) => session._id);
+      const userSessionMap = expiredSessions.reduce((acc, session) => {
+        if (!acc[session.user]) {
+          acc[session.user] = [];
+        }
+        acc[session.user].push(session._id);
+        return acc;
+      }, {});
 
-        await this.userModel.findByIdAndUpdate(userId, {
-          $pull: { sessions: { $in: expiredSessionIds } },
-        });
+      await Promise.all(
+        Object.entries(userSessionMap).map(([userId, sessionIds]) =>
+          this.userModel.updateOne(
+            { _id: userId },
+            {
+              $pull: {
+                sessions: {
+                  _id: { $in: sessionIds },
+                },
+              },
+            },
+          ),
+        ),
+      );
 
-        await this.sessionModel.deleteMany({
-          _id: { $in: expiredSessionIds },
-        });
+      await this.sessionModel.deleteMany({
+        expires_at: { $lt: new Date() },
+      });
+    } catch (error) {
+      console.error('Failed to cleanup expired sessions:', error);
+    }
+  }
+
+  async removeSession(userId: string, refreshToken: string): Promise<void> {
+    try {
+      const session = await this.sessionModel.findOne({
+        user: userId,
+        refresh_token: refreshToken,
+      });
+
+      if (session) {
+        await this.userModel.updateOne(
+          { _id: userId },
+          {
+            $pull: {
+              sessions: {
+                _id: session._id,
+              },
+            },
+          },
+        );
+
+        await this.sessionModel.deleteOne({ _id: session._id });
       }
     } catch (error) {
-      throw new Error(`Failed to cleanup expired sessions: ${error.message}`);
+      throw new Error(`Failed to remove session: ${error.message}`);
     }
   }
 }
