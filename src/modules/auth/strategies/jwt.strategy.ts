@@ -1,14 +1,8 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { ConfigService } from '@nestjs/config';
-import {
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { UsersService } from 'src/modules/users/users.service';
 import { TokenPayload } from '../interfaces/token-payload.interface';
 import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 import { InjectModel } from '@nestjs/mongoose';

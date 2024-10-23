@@ -124,6 +124,7 @@ export class AuthService {
       throw new CustomHttpException(
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,
+        { error },
       );
     }
   }
