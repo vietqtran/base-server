@@ -1,6 +1,7 @@
 import { ROLES_IDS } from './../../constants/roles.constant';
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -60,5 +61,18 @@ export class UsersController {
       avatar: uploadResult,
     });
     return uploadResult;
+  }
+
+  @Delete(':userId/:key')
+  @Public()
+  async deleteAvatar(
+    @Param('userId') userId: string,
+    @Param('key') key: string,
+  ) {
+    const deleteResult = await this.uploadService.deleteFile(key);
+    await this.usersService.findOneAndUpdate(userId, {
+      avatar: deleteResult,
+    });
+    return deleteResult;
   }
 }

@@ -1,4 +1,5 @@
-import { InjectUploadAvatarlQueue } from '@/common/decorators/upload-avatar.decorator';
+import { InjectDeleteFileQueue } from '@/common/decorators/delete-file.decorator';
+import { InjectUploadFileQueue } from '@/common/decorators/upload-file.decorator';
 import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 import { DECORATOR_KEYS } from '@/constants/common';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -8,7 +9,8 @@ import { Queue } from 'bullmq';
 @Injectable()
 export class UploadService {
   constructor(
-    @InjectUploadAvatarlQueue() private avatarUploadQueue: Queue,
+    @InjectUploadFileQueue() private avatarUploadQueue: Queue,
+    @InjectDeleteFileQueue() private deleteFileQueue: Queue,
     private readonly configService: ConfigService,
   ) {}
 
@@ -44,6 +46,17 @@ export class UploadService {
     return {
       url,
       key: newKey,
+    };
+  }
+
+  async deleteFile(key: string) {
+    await this.deleteFileQueue.add(DECORATOR_KEYS.DELETE_IMAGE, {
+      key,
+    });
+
+    return {
+      success: true,
+      key,
     };
   }
 
