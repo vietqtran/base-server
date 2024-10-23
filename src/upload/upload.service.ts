@@ -1,6 +1,7 @@
 import { InjectUploadAvatarlQueue } from '@/common/decorators/upload-avatar.decorator';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 import { DECORATOR_KEYS } from '@/constants/common';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 
@@ -12,14 +13,24 @@ export class UploadService {
   ) {}
 
   async uploadAvatar(file: Express.Multer.File, userId: string) {
+    if (!file) {
+      throw new CustomHttpException('File not found', HttpStatus.NOT_FOUND, {
+        file: ['File not found'],
+      });
+    }
     const key = `avatars/${userId + '_' + new Date().getTime()}-${file.originalname}`;
     const newKey = this.sanitizeFileName(key);
+    const url = `https://${this.configService.get('AWS_S3_BUCKET')}.s3.amazonaws.com/${newKey}`;
     await this.avatarUploadQueue.add(
       DECORATOR_KEYS.UPLOAD_AVATAR,
       {
         userId,
-        fileKey: newKey,
+        key: newKey,
         file,
+        size: {
+          width: 200,
+          height: 200,
+        },
       },
       {
         attempts: 3,
@@ -30,11 +41,9 @@ export class UploadService {
       },
     );
 
-    const url = `https://${this.configService.get('AWS_S3_BUCKET')}.s3.amazonaws.com/${newKey}`;
-
     return {
       url,
-      newKey,
+      key: newKey,
     };
   }
 

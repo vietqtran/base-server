@@ -1,8 +1,4 @@
-import {
-  S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { Processor } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
@@ -33,59 +29,39 @@ export class UploadProcessor extends WorkerHostProcessor {
 
   async process(job: Job) {
     try {
-      const { userId, fileKey, file } = job.data;
+      const { userId, key, file, size } = job.data;
 
       const imageBuffer = Buffer.isBuffer(file.buffer)
         ? file.buffer
         : Buffer.from(file.buffer.data);
 
-      const sizes = [
-        { width: 50, height: 50, suffix: 'thumb' },
-        { width: 200, height: 200, suffix: 'medium' },
-        { width: 500, height: 500, suffix: 'large' },
-      ];
+      const resizedBuffer = await sharp(imageBuffer)
+        .resize(size?.width || 500, size?.height || 500, {
+          fit: 'cover',
+          position: 'center',
+        })
+        .jpeg({ quality: 80 })
+        .toBuffer();
 
-      for (const size of sizes) {
-        const resizedBuffer = await sharp(imageBuffer)
-          .resize(size.width, size.height, {
-            fit: 'cover',
-            position: 'center',
-          })
-          .jpeg({ quality: 80 })
-          .toBuffer();
-
-        const resizedKey = this.getResizedKey(fileKey, size.suffix);
-
-        await this.s3Client.send(
-          new PutObjectCommand({
-            Bucket: this.configService.get('AWS_S3_BUCKET'),
-            Key: resizedKey,
-            Body: resizedBuffer,
-            ACL: 'public-read',
-            ContentType: 'image/jpeg',
-          }),
-        );
-      }
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: this.configService.get('AWS_S3_BUCKET'),
+          Key: key,
+          Body: resizedBuffer,
+          ACL: 'public-read',
+          ContentType: 'image/jpeg',
+        }),
+      );
 
       this.logger.log(`Successfully processed avatar for user ${userId}`);
 
       return {
         success: true,
         userId,
-        sizes: sizes.map((size) => ({
-          size: `${size.width}x${size.height}`,
-          key: this.getResizedKey(fileKey, size.suffix),
-        })),
       };
     } catch (error) {
       this.logger.error(`Error processing avatar: ${error.message}`);
       throw error;
     }
-  }
-
-  private getResizedKey(originalKey: string, suffix: string): string {
-    const keyParts = originalKey.split('.');
-    const extension = keyParts.pop();
-    return `${keyParts.join('.')}-${suffix}.${extension}`;
   }
 }
