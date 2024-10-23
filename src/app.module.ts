@@ -14,6 +14,7 @@ import redisConfig from './config/redis.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailModule } from './mail/mail.module';
 import { QueueModule } from './queue/queue.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { QueueModule } from './queue/queue.module';
       },
       inject: [ConfigService],
     }),
+    UploadModule,
     MailModule,
     QueueModule,
     AuthModule,
