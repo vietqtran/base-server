@@ -14,11 +14,15 @@ import { map, catchError } from 'rxjs/operators';
 export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map((data) => ({
-        data,
-        status: 'success',
-        message: null,
-      })),
+      map((data) => {
+        const statusCode = context.switchToHttp().getResponse().statusCode;
+        return {
+          data,
+          status: 'success',
+          message: null,
+          statusCode,
+        };
+      }),
       catchError((error: any) => {
         let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
         let message = 'An unexpected error occurred';
@@ -43,6 +47,7 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
           data: null,
           status: 'error',
           message,
+          statusCode,
           cause,
         });
       }),

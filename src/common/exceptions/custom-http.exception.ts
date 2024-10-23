@@ -1,11 +1,5 @@
 import { HttpException } from '@nestjs/common';
-
-interface ErrorResponse {
-  data: null;
-  status: 'error';
-  message: string;
-  cause?: Record<string, any>;
-}
+import { ErrorResponse } from '../interfaces/error-response.interface';
 
 export class CustomHttpException extends HttpException {
   constructor(
@@ -17,6 +11,7 @@ export class CustomHttpException extends HttpException {
       data: null,
       status: 'error',
       message,
+      statusCode,
       cause,
     };
     super(response, statusCode);

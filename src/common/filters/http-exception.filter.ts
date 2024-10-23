@@ -6,13 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
-
-interface ErrorResponse {
-  data: null;
-  status: 'error';
-  message: string;
-  cause?: Record<string, any>;
-}
+import { ErrorResponse } from '../interfaces/error-response.interface';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -36,6 +30,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         typeof exceptionResponse === 'string'
           ? exceptionResponse
           : exceptionResponse.message || 'An error occurred',
+      statusCode,
       cause: exceptionResponse.cause,
     };
 
