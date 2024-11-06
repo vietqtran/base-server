@@ -25,7 +25,7 @@ export class AuthGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  notifyUserCreated(user: User) {
+  notifyUserCreated(user: any) {
     this.server.emit('userCreated', user);
   }
 }

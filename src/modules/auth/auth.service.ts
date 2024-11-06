@@ -66,8 +66,6 @@ export class AuthService {
         session,
       );
 
-      this.authGateway.notifyUserCreated(user);
-
       await this.mailService.sendMail({
         context: {
           name: user.username,
@@ -77,7 +75,10 @@ export class AuthService {
         to: user.email,
       });
 
-      return this.sanitizeUser(user);
+      const userResponse = this.sanitizeUser(user);
+      this.authGateway.notifyUserCreated(userResponse);
+
+      return userResponse;
     });
   }
 
