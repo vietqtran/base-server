@@ -12,6 +12,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { TokenService } from '@/helpers/token.service';
 import { SessionsModule } from '../sessions/sessions.module';
 import { MailModule } from '@/mail/mail.module';
+import { AuthGateway } from './auth.gateway';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MailModule } from '@/mail/mail.module';
     JwtRefreshStrategy,
     TransactionService,
     TokenService,
+    AuthGateway
   ],
 })
 export class AuthModule {}

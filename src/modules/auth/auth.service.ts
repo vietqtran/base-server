@@ -11,6 +11,7 @@ import { TokenService } from '@/helpers/token.service';
 import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '@/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthGateway } from './auth.gateway';
 
 export interface AuthResponse {
   user: Partial<User>;
@@ -27,6 +28,7 @@ export class AuthService {
     private readonly transactionService: TransactionService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly authGateway: AuthGateway,
   ) {}
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
@@ -63,6 +65,8 @@ export class AuthService {
         },
         session,
       );
+
+      this.authGateway.notifyUserCreated(user);
 
       await this.mailService.sendMail({
         context: {
