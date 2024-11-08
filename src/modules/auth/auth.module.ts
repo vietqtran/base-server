@@ -38,7 +38,7 @@ import { AuthGateway } from './auth.gateway';
     JwtRefreshStrategy,
     TransactionService,
     TokenService,
-    AuthGateway
+    AuthGateway,
   ],
 })
 export class AuthModule {}

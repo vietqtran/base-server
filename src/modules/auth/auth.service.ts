@@ -94,7 +94,10 @@ export class AuthService {
       throw new CustomHttpException(
         'User already exists',
         HttpStatus.BAD_REQUEST,
-        { email: ['Email is already taken'] },
+        {
+          field: 'Email',
+          message: 'Email is already taken. Please use another email.',
+        },
       );
     }
 
@@ -102,7 +105,10 @@ export class AuthService {
       throw new CustomHttpException(
         'User already exists',
         HttpStatus.BAD_REQUEST,
-        { username: ['Username is already taken'] },
+        {
+          field: 'Username',
+          message: 'Username is already taken. Please use another username.',
+        },
       );
     }
   }
@@ -129,7 +135,10 @@ export class AuthService {
       throw new CustomHttpException(
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,
-        { error },
+        {
+          field: null,
+          message: 'Error occurred while creating user. Please try again.',
+        },
       );
     }
   }
@@ -139,7 +148,8 @@ export class AuthService {
 
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-        email: ['Email not found'],
+        field: 'Email',
+        message: 'Email not found. Please try again.',
       });
     }
 
@@ -147,8 +157,8 @@ export class AuthService {
     if (!isValid) {
       throw new CustomHttpException(
         'Invalid password',
-        HttpStatus.UNAUTHORIZED,
-        { password: ['Invalid password'] },
+        HttpStatus.BAD_REQUEST,
+        { field: 'Password', message: 'Invalid password. Please try again.' },
       );
     }
 
