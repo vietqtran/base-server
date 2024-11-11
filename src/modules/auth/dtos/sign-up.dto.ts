@@ -21,6 +21,12 @@ export class SignUpDto {
   password: string;
 
   @ApiProperty({
+    description: 'Confirm Password',
+    example: '123456',
+  })
+  confirmPassword: string;
+
+  @ApiProperty({
     description: 'Roles',
     example: [ROLES_IDS.USER],
   })

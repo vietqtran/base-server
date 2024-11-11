@@ -54,6 +54,16 @@ export class AuthService {
   }
 
   async signUp(signUpDto: SignUpDto): Promise<Partial<User>> {
+    if (signUpDto.password !== signUpDto.confirmPassword) {
+      throw new CustomHttpException(
+        'Passwords do not match',
+        HttpStatus.BAD_REQUEST,
+        {
+          field: 'Confirm Password',
+          message: 'Passwords do not match. Please try again.',
+        },
+      );
+    }
     await this.validateUniqueFields(signUpDto);
 
     return this.transactionService.executeInTransaction(async (session) => {
