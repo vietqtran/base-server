@@ -59,8 +59,8 @@ export class AuthService {
         'Passwords do not match',
         HttpStatus.BAD_REQUEST,
         {
-          field: 'Confirm Password',
-          message: 'Passwords do not match. Please try again.',
+          field: 'confirm-password',
+          message: 'not-match',
         },
       );
     }
@@ -105,8 +105,8 @@ export class AuthService {
         'User already exists',
         HttpStatus.BAD_REQUEST,
         {
-          field: 'Email',
-          message: 'Email is already taken. Please use another email.',
+          field: 'email',
+          message: 'existed',
         },
       );
     }
@@ -116,8 +116,8 @@ export class AuthService {
         'User already exists',
         HttpStatus.BAD_REQUEST,
         {
-          field: 'Username',
-          message: 'Username is already taken. Please use another username.',
+          field: 'username',
+          message: 'existed',
         },
       );
     }
@@ -146,8 +146,8 @@ export class AuthService {
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,
         {
-          field: null,
-          message: 'Error occurred while creating user. Please try again.',
+          field: 'system-error',
+          message: 'create-user',
         },
       );
     }
@@ -158,8 +158,8 @@ export class AuthService {
 
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-        field: 'Email',
-        message: 'Email not found. Please try again.',
+        field: 'email',
+        message: 'not-found',
       });
     }
 
@@ -168,7 +168,10 @@ export class AuthService {
       throw new CustomHttpException(
         'Invalid password',
         HttpStatus.BAD_REQUEST,
-        { field: 'Password', message: 'Invalid password. Please try again.' },
+        {
+          field: 'password',
+          message: 'wrong-credentials',
+        },
       );
     }
 

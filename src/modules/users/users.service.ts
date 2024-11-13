@@ -41,7 +41,8 @@ export class UsersService {
       const user = await this.userModel.findOne({ email }).exec();
       if (!user) {
         throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-          email: ['Email not found'],
+          field: 'email',
+          message: 'not-found',
         });
       }
       const isValid = await argon2.verify(password, user.password_hash);
@@ -50,7 +51,8 @@ export class UsersService {
           'Invalid password',
           HttpStatus.UNAUTHORIZED,
           {
-            password: ['Invalid password'],
+            field: 'password',
+            message: 'wrong-credentials',
           },
         );
       }
@@ -85,7 +87,8 @@ export class UsersService {
       const user = await this.userModel.findOne({ _id: userId }).exec();
       if (!user) {
         throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-          email: ['Email not found'],
+          field: 'user',
+          message: 'not-found',
         });
       }
       return await this.userModel

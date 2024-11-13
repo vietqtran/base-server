@@ -17,7 +17,8 @@ export class UploadService {
   async uploadAvatar(file: Express.Multer.File, userId: string) {
     if (!file) {
       throw new CustomHttpException('File not found', HttpStatus.NOT_FOUND, {
-        file: ['File not found'],
+        field: 'file',
+        message: 'not-found',
       });
     }
     const key = `avatars/${userId + '_' + new Date().getTime()}-${file.originalname}`;

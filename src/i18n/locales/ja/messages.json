@@ -1,10 +1,23 @@
 {
-  "WELCOME": {
-    "TITLE": "ようこそ",
-    "DESCRIPTION": "これは歓迎メッセージです"
-  },
-  "ERRORS": {
-    "NOT_FOUND": "リソースが見つかりません",
-    "UNAUTHORIZED": "不正アクセス"
+  "common": {
+    "fields": {
+      "confirm-password": "パスワード確認",
+      "email": "メール",
+      "password": "パスワード",
+      "username": "ユーザー名",
+      "system-error": "システムエラー",
+      "refresh-token": "リフレッシュトークン",
+      "user": "ユーザー",
+      "file": "ファイル"
+    },
+    "errors": {
+      "wrong-credentials": "{field}が間違っています。",
+      "not-match": "{field}が一致しません。",
+      "existed": "{field}は既に存在しています。",
+      "create-user": "ユーザー作成中にシステムエラーが発生しました。後でもう一度お試しください。",
+      "not-found": "{field}が見つかりません。",
+      "missing-token": "トークンがありません。",
+      "invalid-token": "{field}が無効です。"
+    }
   }
 }

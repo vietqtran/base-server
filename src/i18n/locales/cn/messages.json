@@ -1,10 +1,23 @@
 {
-  "WELCOME": {
-    "TITLE": "欢迎",
-    "DESCRIPTION": "这是一条欢迎消息"
-  },
-  "ERRORS": {
-    "NOT_FOUND": "找不到资源",
-    "UNAUTHORIZED": "未经授权的访问"
+  "common": {
+    "fields": {
+      "confirm-password": "确认密码",
+      "email": "电子邮件",
+      "password": "密码",
+      "username": "用户名",
+      "system-error": "系统错误",
+      "refresh-token": "刷新令牌",
+      "user": "用户",
+      "file": "文件"
+    },
+    "errors": {
+      "wrong-credentials": "{field}错误。",
+      "not-match": "{field}不匹配。",
+      "existed": "{field}已存在。",
+      "create-user": "创建用户时发生系统错误，请稍后再试。",
+      "not-found": "未找到{field}。",
+      "missing-token": "缺少令牌。",
+      "invalid-token": "{field}无效。"
+    }
   }
 }

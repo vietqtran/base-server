@@ -1,10 +1,23 @@
 {
-  "WELCOME": {
-    "TITLE": "Chào mừng",
-    "DESCRIPTION": "Đây là tin nhắn chào mừng"
-  },
-  "ERRORS": {
-    "NOT_FOUND": "Không tìm thấy tài nguyên",
-    "UNAUTHORIZED": "Truy cập trái phép"
+  "common": {
+    "fields": {
+      "confirm-password": "xác nhận mật khẩu",
+      "email": "email",
+      "password": "mật khẩu",
+      "username": "tên người dùng",
+      "system-error": "lỗi hệ thống",
+      "refresh-token": "refresh token",
+      "user": "người dùng",
+      "file": "file"
+    },
+    "errors": {
+      "wrong-credentials": "Sai {field}.",
+      "not-match": "{field} không khớp.",
+      "existed": "{field} này đã tồn tại.",
+      "create-user": "Có lỗi xảy ra trong khi tạo tài khoản. Vui lòng thử lại.",
+      "not-found": "Không tìm thấy {field}.",
+      "missing-token": "Thiếu token.",
+      "invalid-token": "{field} không hợp lệ."
+    }
   }
 }

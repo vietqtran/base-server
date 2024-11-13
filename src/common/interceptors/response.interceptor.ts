@@ -42,17 +42,13 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
             typeof response === 'string'
               ? response
               : response.message || message;
-          cause = response.cause;
+          cause = this.transCause(response.cause, i18n, language);
         } else if (error instanceof Error) {
           message = error.message;
         }
 
         const httpResponse = context.switchToHttp().getResponse<Response>();
         httpResponse.status(statusCode);
-
-        const mess = i18n.t('messages.WELCOME.TITLE', { lang: language });
-        console.log('lang', language);
-        console.log('hello', mess);
 
         return Promise.resolve({
           data: null,
@@ -63,5 +59,19 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
         });
       }),
     );
+  }
+
+  transCause(cause: any, i18n: I18nContext, lang: string) {
+    console.log('cause', cause);
+    const field = i18n.t(`messages.common.fields.${cause.field}`, { lang });
+    return {
+      field,
+      message: i18n.t(`messages.common.errors.${cause.message}`, {
+        lang,
+        args: {
+          field,
+        },
+      }),
+    };
   }
 }

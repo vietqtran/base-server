@@ -38,7 +38,8 @@ export class JwtRefreshStrategy extends PassportStrategy(
     const refreshToken = JwtRefreshStrategy.extractJWT(req);
     if (!refreshToken)
       throw new CustomHttpException('Missing refresh token', 400, {
-        refreshToken: ['Missing refresh token'],
+        field: 'refresh-token',
+        message: 'missing-token',
       });
     const user = await this.userModel.findOne({ _id: payload.sub });
     const isValid = await this.jwtService.verify(refreshToken, {
@@ -46,7 +47,8 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
     if (!isValid) {
       throw new CustomHttpException('Invalid refresh token', 401, {
-        refreshToken: ['Invalid refresh token'],
+        field: 'refresh-token',
+        message: 'invalid-token',
       });
     }
     return user;
