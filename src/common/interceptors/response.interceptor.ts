@@ -19,6 +19,7 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
     if (Array.isArray(language)) {
       language = language[0];
     }
+    console.log('Language', language);
     const i18n = I18nContext.current();
     return next.handle().pipe(
       map((data) => {
@@ -42,7 +43,7 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
             typeof response === 'string'
               ? response
               : response.message || message;
-          cause = this.transCause(response.cause, i18n, language);
+          cause = this.transCause(response.cause, i18n);
         } else if (error instanceof Error) {
           message = error.message;
         }
@@ -61,17 +62,19 @@ export class ResponseParserInterceptor<T> implements NestInterceptor<T, any> {
     );
   }
 
-  transCause(cause: any, i18n: I18nContext, lang: string) {
-    console.log('cause', cause);
-    const field = i18n.t(`messages.common.fields.${cause.field}`, { lang });
-    return {
-      field,
-      message: i18n.t(`messages.common.errors.${cause.message}`, {
-        lang,
-        args: {
-          field,
-        },
-      }),
-    };
+  transCause(cause: any, i18n: I18nContext) {
+    ['vi', 'en', 'cn', 'ja'].forEach((lang) => {
+      const field = i18n.t(`messages.common.fields.${cause.field}`, { lang });
+      cause[lang] = {
+        field,
+        message: i18n.t(`messages.common.errors.${cause.message}`, {
+          lang,
+          args: { field },
+        }),
+      };
+    });
+    cause.field = undefined;
+    cause.message = undefined;
+    return cause;
   }
 }
