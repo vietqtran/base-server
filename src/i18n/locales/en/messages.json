@@ -1,0 +1,10 @@
+{
+  "WELCOME": {
+    "TITLE": "Welcome",
+    "DESCRIPTION": "This is a welcome message"
+  },
+  "ERRORS": {
+    "NOT_FOUND": "Resource not found",
+    "UNAUTHORIZED": "Unauthorized access"
+  }
+}

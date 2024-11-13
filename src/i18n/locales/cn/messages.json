@@ -1,0 +1,10 @@
+{
+  "WELCOME": {
+    "TITLE": "欢迎",
+    "DESCRIPTION": "这是一条欢迎消息"
+  },
+  "ERRORS": {
+    "NOT_FOUND": "找不到资源",
+    "UNAUTHORIZED": "未经授权的访问"
+  }
+}

@@ -13,6 +13,7 @@ import { TokenService } from '@/helpers/token.service';
 import { SessionsModule } from '../sessions/sessions.module';
 import { MailModule } from '@/mail/mail.module';
 import { AuthGateway } from './auth.gateway';
+import { I18nConfigModule } from '@/i18n/i18n.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthGateway } from './auth.gateway';
     }),
     SessionsModule,
     MailModule,
+    I18nConfigModule,
   ],
   controllers: [AuthController],
   providers: [

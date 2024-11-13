@@ -1,0 +1,10 @@
+{
+  "WELCOME": {
+    "TITLE": "ようこそ",
+    "DESCRIPTION": "これは歓迎メッセージです"
+  },
+  "ERRORS": {
+    "NOT_FOUND": "リソースが見つかりません",
+    "UNAUTHORIZED": "不正アクセス"
+  }
+}
