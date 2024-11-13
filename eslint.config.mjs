@@ -14,8 +14,8 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [{
-    ignores: ["**/.eslintrc.js"],
+export default [ {
+    ignores: [ "**/.eslintrc.js" ],
 }, ...compat.extends("plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"), {
     plugins: {
         "@typescript-eslint": typescriptEslintEslintPlugin,
@@ -33,7 +33,6 @@ export default [{
 
         parserOptions: {
             project: "tsconfig.json",
-            tsconfigRootDir: "/workspaces/codespaces-blank",
         },
     },
 
@@ -43,4 +42,4 @@ export default [{
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
     },
-}];
+} ];
