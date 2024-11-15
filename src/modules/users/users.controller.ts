@@ -31,7 +31,6 @@ export class UsersController {
   }
 
   @Get('/without-auth')
-  @Public()
   async getAllWithoutAuth() {
     return await this.usersService.findAll();
   }

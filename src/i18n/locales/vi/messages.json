@@ -8,7 +8,8 @@
       "system-error": "lỗi hệ thống",
       "refresh-token": "refresh token",
       "user": "người dùng",
-      "file": "file"
+      "file": "file",
+      "token": "token"
     },
     "errors": {
       "wrong-credentials": "Sai {field}.",
@@ -17,7 +18,8 @@
       "create-user": "Có lỗi xảy ra trong khi tạo tài khoản. Vui lòng thử lại.",
       "not-found": "Không tìm thấy {field}.",
       "missing-token": "Thiếu token.",
-      "invalid-token": "{field} không hợp lệ."
+      "invalid-token": "{field} không hợp lệ.",
+      "system-error": "Có lỗi xảy ra với hệ thống. Vui lòng thử lại sau."
     }
   }
 }

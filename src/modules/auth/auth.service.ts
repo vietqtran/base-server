@@ -12,6 +12,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '@/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { AuthGateway } from './auth.gateway';
+import RequestWithUser from './interfaces/request-with-user.interface';
 
 export interface AuthResponse {
   user: Partial<User>;
@@ -176,6 +177,21 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async refreshToken (user: User) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.tokenService.generateAccessToken(user),
+      this.tokenService.generateRefreshToken(user),
+    ])
+
+    await this.sessionService.upsertSession(
+      user._id,
+      accessToken,
+      refreshToken,
+    );
+
+    return "success";
   }
 
   private sanitizeUser(user: User): Partial<User> {

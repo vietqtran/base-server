@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import * as argon2 from 'argon2';
 import { Session } from './schemas/session.schema';
 import { User } from '../users/schemas/user.schema';
+import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 
 @Injectable()
 export class SessionsService {
@@ -21,27 +22,39 @@ export class SessionsService {
     refreshToken: string,
   ): Promise<Session> {
     try {
-      const hashedRefreshToken = await argon2.hash(refreshToken);
-
       const expireInMs =
         parseInt(this.configService.get('JWT_EXPIRE_IN')) * 1000;
 
       if (isNaN(expireInMs)) {
-        throw new Error('Invalid JWT_EXPIRE_IN configuration');
+        throw new CustomHttpException(
+          'Token\'s expiration is not a valid number',
+          HttpStatus.BAD_REQUEST,
+          {
+            field: 'token',
+            message: 'invalid-format',
+          },
+        );
       }
 
       const expiresAt = new Date(Date.now() + expireInMs);
 
       if (isNaN(expiresAt.getTime())) {
-        throw new Error('Invalid expiration date generated');
+        throw new CustomHttpException(
+          "Token's expiration is not a valid number",
+          HttpStatus.BAD_REQUEST,
+          {
+            field: 'token',
+            message: 'invalid-format',
+          },
+        );
       }
 
       const session = await this.sessionModel.findOneAndUpdate(
-        { user: userId, refresh_token: refreshToken },
+        { user: userId },
         {
           user: userId,
           access_token: accessToken,
-          refresh_token: hashedRefreshToken,
+          refresh_token: refreshToken,
           expires_at: expiresAt,
         },
         { upsert: true, new: true },
@@ -53,7 +66,14 @@ export class SessionsService {
 
       return session;
     } catch (error) {
-      throw new Error(`Failed to upsert session: ${error.message}`);
+      throw new CustomHttpException(
+        'Failed to upsert session',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          field: 'system-error',
+          message: 'system-error',
+        },
+      );
     }
   }
 
@@ -91,7 +111,14 @@ export class SessionsService {
         expires_at: { $lt: new Date() },
       });
     } catch (error) {
-      console.error('Failed to cleanup expired sessions:', error);
+      throw new CustomHttpException(
+        'Failed to cleanup expired sessions',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          field: 'system-error',
+          message: 'system-error',
+        },
+      );
     }
   }
 
@@ -117,7 +144,14 @@ export class SessionsService {
         await this.sessionModel.deleteOne({ _id: session._id });
       }
     } catch (error) {
-      throw new Error(`Failed to remove session: ${error.message}`);
+      throw new CustomHttpException(
+        'Failed to remove session',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          field: 'system-error',
+          message: 'system-error',
+        },
+      );
     }
   }
 }

@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from '../interfaces/token-payload.interface';
-import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
 import { Model } from 'mongoose';
 import { User } from '@/modules/users/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { Session } from '@/modules/sessions/schemas/session.schema';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -19,37 +19,31 @@ export class JwtRefreshStrategy extends PassportStrategy(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(Session.name) private sessionModel: Model<Session>,
   ) {
     super({
-      jwtFromRequest: JwtRefreshStrategy.extractJWT,
+      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
       passReqToCallback: true,
     });
   }
 
-  private static extractJWT(req: Request): string | null {
-    if (req && req.body && req.body.refreshToken) {
-      return req.body.refreshToken;
-    }
-    return null;
-  }
-
   async validate(req: Request, payload: TokenPayload) {
-    const refreshToken = JwtRefreshStrategy.extractJWT(req);
-    if (!refreshToken)
-      throw new CustomHttpException('Missing refresh token', 400, {
-        field: 'refresh-token',
-        message: 'missing-token',
-      });
-    const user = await this.userModel.findOne({ _id: payload.sub });
-    const isValid = await this.jwtService.verify(refreshToken, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    const refreshToken = req.body.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found');
+    }
+    const session = await this.sessionModel.findOne({
+      refresh_token: refreshToken,
     });
-    if (!isValid) {
-      throw new CustomHttpException('Invalid refresh token', 401, {
-        field: 'refresh-token',
-        message: 'invalid-token',
-      });
+    if (!session) {
+      throw new UnauthorizedException('Invalid refresh token in session');
+    }
+    const user = await this.userModel.findOne({
+      _id: payload.sub,
+    });
+    if (!user) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
     return user;
   }

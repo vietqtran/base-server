@@ -8,7 +8,8 @@
       "system-error": "系统错误",
       "refresh-token": "刷新令牌",
       "user": "用户",
-      "file": "文件"
+      "file": "文件",
+      "token": "令牌"
     },
     "errors": {
       "wrong-credentials": "{field}错误。",
@@ -17,7 +18,8 @@
       "create-user": "创建用户时发生系统错误，请稍后再试。",
       "not-found": "未找到{field}。",
       "missing-token": "缺少令牌。",
-      "invalid-token": "{field}无效。"
+      "invalid-token": "{field}无效。",
+      "system-error": "服务器内部错误，请稍后再试。"
     }
   }
 }

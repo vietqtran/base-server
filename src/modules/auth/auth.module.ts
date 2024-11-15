@@ -14,10 +14,12 @@ import { SessionsModule } from '../sessions/sessions.module';
 import { MailModule } from '@/mail/mail.module';
 import { AuthGateway } from './auth.gateway';
 import { I18nConfigModule } from '@/i18n/i18n.module';
+import { Session, SessionSchema } from '../sessions/schemas/session.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
