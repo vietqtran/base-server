@@ -1,5 +1,6 @@
 export type TemplateParams = {
   name: string;
+  verifyUrl: string;
 };
 
 export class SendMailDto {

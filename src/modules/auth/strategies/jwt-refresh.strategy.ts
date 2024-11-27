@@ -37,7 +37,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       refresh_token: refreshToken,
     });
     if (!session) {
-      throw new UnauthorizedException('Invalid refresh token in session');
+      throw new UnauthorizedException('Invalid refresh token');
     }
     const user = await this.userModel.findOne({
       _id: payload.sub,

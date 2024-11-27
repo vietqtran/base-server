@@ -12,7 +12,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '@/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { AuthGateway } from './auth.gateway';
-import RequestWithUser from './interfaces/request-with-user.interface';
+import { VerifyDto } from './dtos/verify.dto';
 
 export interface AuthResponse {
   user: Partial<User>;
@@ -69,6 +69,7 @@ export class AuthService {
 
     return this.transactionService.executeInTransaction(async (session) => {
       const hashedPassword = await argon2.hash(signUpDto.password);
+
       const user = await this.createUser(
         {
           ...signUpDto,
@@ -77,9 +78,21 @@ export class AuthService {
         session,
       );
 
+      const verifyToken = await this.tokenService.generateVerifyToken(user);
+
+      await this.userModel.findByIdAndUpdate(user._id, {
+        $set: {
+          verify_token: verifyToken,
+          verify_token_expires_at: new Date(
+            Date.now() + this.configService.get<string>('JWT_VERIFY_EXPIRE_IN'),
+          ),
+        },
+      });
+
       await this.mailService.sendMail({
         context: {
           name: user.username,
+          verifyUrl: `${this.configService.get<string>('CLIENT_APP_URL')}/verify/${verifyToken}`,
         },
         subject: `Welcome to ${this.configService.get<string>('APP_NAME')}`,
         template: 'welcome',
@@ -91,6 +104,33 @@ export class AuthService {
 
       return userResponse;
     });
+  }
+
+  async verify(verifyDto: VerifyDto) {
+    const { token } = verifyDto;
+    const jwtPayload = await this.tokenService.verifyToken(token);
+    if (!jwtPayload.sub) {
+      throw new CustomHttpException('Invalid token', HttpStatus.BAD_REQUEST, {
+        field: 'token',
+        message: 'invalid',
+      });
+    }
+    const existedUser = await this.userModel.findById(jwtPayload.sub);
+    if (!existedUser) {
+      throw new CustomHttpException('Invalid token', HttpStatus.BAD_REQUEST, {
+        field: 'token',
+        message: 'invalid',
+      });
+    }
+    const user = await this.userModel.findByIdAndUpdate(existedUser._id, {
+      $set: {
+        is_verified: true,
+        verify_token: null,
+        verify_token_expires_at: null,
+      },
+    });
+
+    return this.sanitizeUser(user);
   }
 
   private async validateUniqueFields(signUpDto: SignUpDto): Promise<void> {
@@ -143,6 +183,7 @@ export class AuthService {
 
       return user[0];
     } catch (error) {
+      console.log('error', error);
       throw new CustomHttpException(
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -179,11 +220,11 @@ export class AuthService {
     return user;
   }
 
-  async refreshToken (user: User) {
+  async refreshToken(user: User) {
     const [accessToken, refreshToken] = await Promise.all([
       this.tokenService.generateAccessToken(user),
       this.tokenService.generateRefreshToken(user),
-    ])
+    ]);
 
     await this.sessionService.upsertSession(
       user._id,
@@ -191,7 +232,10 @@ export class AuthService {
       refreshToken,
     );
 
-    return "success";
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   private sanitizeUser(user: User): Partial<User> {

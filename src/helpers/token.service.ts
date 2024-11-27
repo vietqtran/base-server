@@ -30,6 +30,19 @@ export class TokenService {
     return this.jwtService.signAsync(payload, config);
   }
 
+  async generateVerifyToken(user: User): Promise<string> {
+    const payload = this.createTokenPayload(user);
+    const config: TokenConfig = {
+      secret: this.configService.get<string>('JWT_VERIFY_SECRET'),
+      expiresIn: `${this.configService.get<string>('JWT_VERIFY_EXPIRE_IN')}s`,
+    };
+    return this.jwtService.signAsync(payload, config);
+  }
+
+  async verifyToken(token: string): Promise<TokenPayload> {
+    return this.jwtService.verifyAsync(token);
+  }
+
   private createTokenPayload(user: User): TokenPayload {
     return {
       sub: user._id,

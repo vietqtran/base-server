@@ -55,6 +55,12 @@ export class User extends BaseSchema {
   @IsBoolean()
   is_verified?: boolean;
 
+  @Prop({ required: false, default: null })
+  verify_token?: string;
+
+  @Prop({ required: false, default: null })
+  verify_token_expires_at?: string;
+
   @Prop({ type: PublicFile, default: null })
   @Type(() => PublicFile)
   avatar?: PublicFile;

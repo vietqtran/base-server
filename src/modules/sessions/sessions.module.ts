@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { SessionSchema, Session } from './schemas/session.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { ScheduleModule } from '@nestjs/schedule';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
   ],
   controllers: [SessionsController],
-  providers: [SessionsService],
+  providers: [SessionsService, JwtService],
   exports: [SessionsService],
 })
 export class SessionsModule {}

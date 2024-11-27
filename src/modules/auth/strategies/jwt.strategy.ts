@@ -23,9 +23,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenPayload) {
-    const user = await this.userModel.findOne({ _id: payload.sub }).select(
-      '-sessions',
-    );
+    const user = await this.userModel
+      .findOne({ _id: payload.sub })
+      .select('-sessions');
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
         field: 'user',

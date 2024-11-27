@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
-import * as argon2 from 'argon2';
 import { Session } from './schemas/session.schema';
 import { User } from '../users/schemas/user.schema';
 import { CustomHttpException } from '@/common/exceptions/custom-http.exception';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class SessionsService {
@@ -14,6 +14,7 @@ export class SessionsService {
     @InjectModel('Session') private sessionModel: Model<any>,
     @InjectModel('User') private userModel: Model<User>,
     private configService: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
   async upsertSession(
@@ -22,12 +23,23 @@ export class SessionsService {
     refreshToken: string,
   ): Promise<Session> {
     try {
+      const isRefreshTokenValid = await this.validateRefreshToken(refreshToken);
+      if (!isRefreshTokenValid) {
+        throw new CustomHttpException(
+          'Refresh token is expired',
+          HttpStatus.BAD_REQUEST,
+          {
+            field: 'refresh-token',
+            message: 'expired',
+          },
+        );
+      }
       const expireInMs =
-        parseInt(this.configService.get('JWT_EXPIRE_IN')) * 1000;
+        (parseInt(this.configService.get('JWT_REFRESH_EXPIRE_IN')) + 60) * 1000;
 
       if (isNaN(expireInMs)) {
         throw new CustomHttpException(
-          'Token\'s expiration is not a valid number',
+          "Token's expiration is not a valid number",
           HttpStatus.BAD_REQUEST,
           {
             field: 'token',
@@ -77,7 +89,7 @@ export class SessionsService {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanupExpiredSessions() {
     try {
       const expiredSessions = await this.sessionModel.find({
@@ -153,5 +165,10 @@ export class SessionsService {
         },
       );
     }
+  }
+
+  async validateRefreshToken(refreshToken: string): Promise<boolean> {
+    const isExpired = await this.jwtService.verifyAsync(refreshToken);
+    return !isExpired;
   }
 }
