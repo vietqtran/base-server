@@ -11,13 +11,14 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import RoleGuard from '../auth/guards/role.guard';
-import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from '@/common/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../../upload/upload.service';
 
 @ApiBearerAuth()
 @Controller('users')
+@ApiTags('Users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,

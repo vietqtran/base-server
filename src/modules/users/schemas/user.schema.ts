@@ -1,5 +1,6 @@
 import { BaseSchema } from '@/common/base/schema.base';
 import { ROLES_IDS } from '@/constants/roles.constant';
+import { Passkey } from '@/modules/passkey/schemas/passkey.schema';
 import { Session } from '@/modules/sessions/schemas/session.schema';
 import { SocialLogin } from '@/modules/social-login/schemas/social-login.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -56,9 +57,11 @@ export class User extends BaseSchema {
   is_verified?: boolean;
 
   @Prop({ required: false, default: null })
+  @IsString()
   verify_token?: string;
 
   @Prop({ required: false, default: null })
+  @IsString()
   verify_token_expires_at?: string;
 
   @Prop({ type: PublicFile, default: null })
@@ -74,6 +77,11 @@ export class User extends BaseSchema {
   @ValidateNested()
   @Type(() => SocialLogin)
   social_logins: SocialLogin[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Passkey' }] })
+  @ValidateNested()
+  @Type(() => Passkey)
+  passkeys: Passkey[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

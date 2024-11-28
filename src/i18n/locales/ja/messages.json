@@ -9,7 +9,8 @@
       "refresh-token": "リフレッシュトークン",
       "user": "ユーザー",
       "file": "ファイル",
-      "token": "トークン"
+      "token": "トークン",
+      "passkey": "パスキー"
     },
     "errors": {
       "wrong-credentials": "{field}が間違っています。",

@@ -78,21 +78,10 @@ export class AuthService {
         session,
       );
 
-      const verifyToken = await this.tokenService.generateVerifyToken(user);
-
-      await this.userModel.findByIdAndUpdate(user._id, {
-        $set: {
-          verify_token: verifyToken,
-          verify_token_expires_at: new Date(
-            Date.now() + this.configService.get<string>('JWT_VERIFY_EXPIRE_IN'),
-          ),
-        },
-      });
-
       await this.mailService.sendMail({
         context: {
           name: user.username,
-          verifyUrl: `${this.configService.get<string>('CLIENT_APP_URL')}/verify/${verifyToken}`,
+          verifyUrl: `${this.configService.get<string>('CLIENT_APP_URL')}/verify/${user.verify_token}`,
         },
         subject: `Welcome to ${this.configService.get<string>('APP_NAME')}`,
         template: 'welcome',
@@ -169,6 +158,9 @@ export class AuthService {
     session?: ClientSession,
   ): Promise<User> {
     try {
+      const verify_token = await this.tokenService.generateVerifyToken(
+        createUserDto.email,
+      );
       const user = await this.userModel.create(
         [
           {
@@ -176,6 +168,8 @@ export class AuthService {
             email: createUserDto.email,
             password_hash: createUserDto.password_hash,
             roles: createUserDto.roles,
+            verify_token,
+            is_verified: false,
           },
         ],
         { session },
@@ -226,6 +220,19 @@ export class AuthService {
       this.tokenService.generateRefreshToken(user),
     ]);
 
+    const isRefreshTokenValid =
+      await this.tokenService.validateRefreshToken(refreshToken);
+    if (!isRefreshTokenValid) {
+      throw new CustomHttpException(
+        'Refresh token is expired',
+        HttpStatus.BAD_REQUEST,
+        {
+          field: 'refresh-token',
+          message: 'expired',
+        },
+      );
+    }
+
     await this.sessionService.upsertSession(
       user._id,
       accessToken,
@@ -244,7 +251,8 @@ export class AuthService {
     sanitizedUser.sessions = undefined;
     sanitizedUser.social_logins = undefined;
     sanitizedUser.is_active = undefined;
-
+    sanitizedUser.verify_token = undefined;
+    sanitizedUser.verify_token_expires_at = undefined;
     return sanitizedUser;
   }
 }

@@ -15,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MailModule } from './mail/mail.module';
 import { QueueModule } from './queue/queue.module';
 import { UploadModule } from './upload/upload.module';
+import { PasskeyModule } from '@/modules/passkey/passkey.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { UploadModule } from './upload/upload.module';
     SessionsModule,
     SocialLoginModule,
     PermissionsModule,
+    PasskeyModule,
   ],
 })
 export class AppModule {

@@ -9,7 +9,8 @@
       "refresh-token": "刷新令牌",
       "user": "用户",
       "file": "文件",
-      "token": "令牌"
+      "token": "令牌",
+      "passkey": "passkey"
     },
     "errors": {
       "wrong-credentials": "{field}错误。",

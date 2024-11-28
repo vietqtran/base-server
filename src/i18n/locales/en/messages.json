@@ -9,7 +9,8 @@
       "refresh-token": "refresh token",
       "user": "user",
       "file": "file",
-      "token": "token"
+      "token": "token",
+      "passkey": "passkey"
     },
     "errors": {
       "wrong-credentials": "{field} is wrong.",

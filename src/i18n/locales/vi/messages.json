@@ -9,7 +9,8 @@
       "refresh-token": "refresh token",
       "user": "người dùng",
       "file": "file",
-      "token": "token"
+      "token": "token",
+      "passkey": "passkey"
     },
     "errors": {
       "wrong-credentials": "Sai {field}.",
