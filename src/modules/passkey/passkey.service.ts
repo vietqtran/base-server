@@ -16,7 +16,6 @@ import {
 import { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schema';
 import { PasskeyStartAuthenticationDto } from './dtos/passkey-start-authentication.dto';
-import { PasskeyStartRegistrationDto } from './dtos/passkey-start-registration.dto';
 import { PasskeyVerifyRegistrationDto } from './dtos/passkey-verify-registration.dto';
 import { Passkey } from './schemas/passkey.schema';
 
@@ -29,11 +28,11 @@ export class PasskeyService {
   ) {}
 
   async startRegistration(
-    passkeyStartRegistrationDto: PasskeyStartRegistrationDto,
+    userId: string,
   ): Promise<PublicKeyCredentialCreationOptionsJSON> {
     try {
       const user = await this.userModel.findOne({
-        email: passkeyStartRegistrationDto.email,
+        _id: userId,
       });
       if (!user) {
         throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
@@ -71,17 +70,9 @@ export class PasskeyService {
   }
 
   async verifyRegistration(
+    userId: string,
     passkeyVerifyRegistrationDto: PasskeyVerifyRegistrationDto,
   ) {
-    const user = await this.userModel.findOne({
-      email: passkeyVerifyRegistrationDto.email,
-    });
-    if (!user) {
-      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-        field: 'user',
-        message: 'not-found',
-      });
-    }
     const verifyResponse = await verifyRegistrationResponse({
       response: passkeyVerifyRegistrationDto.response,
       expectedChallenge: passkeyVerifyRegistrationDto.challenge,
@@ -93,7 +84,7 @@ export class PasskeyService {
       console.log('Passkey verified', verifyResponse);
       const passkey = await this.passkeyModel.create({
         ...verifyResponse,
-        user_id: user._id,
+        user_id: userId,
         aaguid: verifyResponse.registrationInfo.aaguid,
         credential_type: verifyResponse.registrationInfo.credentialType,
         credential_id: verifyResponse.registrationInfo.credential.id,
@@ -103,7 +94,7 @@ export class PasskeyService {
       });
 
       await this.userModel.updateOne(
-        { _id: user._id },
+        { _id: userId },
         {
           $push: {
             passkeys: passkey,
@@ -124,11 +115,9 @@ export class PasskeyService {
     );
   }
 
-  async startAuthentication(
-    passkeyStartAuthenticationDto: PasskeyStartAuthenticationDto,
-  ) {
+  async startAuthentication(email: string) {
     const user = await this.userModel.findOne({
-      email: passkeyStartAuthenticationDto.email,
+      email,
     });
 
     if (!user) {
@@ -166,20 +155,11 @@ export class PasskeyService {
   }
 
   async verifyAuthentication(
+    userId: string,
     passkeyStartAuthenticationDto: PasskeyStartAuthenticationDto,
   ) {
-    const user = await this.userModel.findOne({
-      email: passkeyStartAuthenticationDto.email,
-    });
-    if (!user) {
-      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
-        field: 'user',
-        message: 'not-found',
-      });
-    }
-
     const passkey = await this.passkeyModel.findOne({
-      user_id: user._id,
+      user_id: userId,
     });
 
     if (!passkey) {
