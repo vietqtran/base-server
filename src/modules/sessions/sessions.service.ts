@@ -59,7 +59,7 @@ export class SessionsService {
     );
 
     await this.userModel.findByIdAndUpdate(userId, {
-      $addToSet: { sessions: session },
+      $addToSet: { sessions: session._id },
     });
 
     return session;

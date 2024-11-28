@@ -220,19 +220,6 @@ export class AuthService {
       this.tokenService.generateRefreshToken(user),
     ]);
 
-    const isRefreshTokenValid =
-      await this.tokenService.validateRefreshToken(refreshToken);
-    if (!isRefreshTokenValid) {
-      throw new CustomHttpException(
-        'Refresh token is expired',
-        HttpStatus.BAD_REQUEST,
-        {
-          field: 'refresh-token',
-          message: 'expired',
-        },
-      );
-    }
-
     await this.sessionService.upsertSession(
       user._id,
       accessToken,

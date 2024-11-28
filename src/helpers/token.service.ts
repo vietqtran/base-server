@@ -58,9 +58,4 @@ export class TokenService {
       roles: [...user.roles],
     };
   }
-
-  async validateRefreshToken(refreshToken: string): Promise<boolean> {
-    const isExpired = await this.jwtService.verifyAsync(refreshToken);
-    return !isExpired;
-  }
 }

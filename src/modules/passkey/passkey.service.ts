@@ -40,12 +40,15 @@ export class PasskeyService {
           message: 'not-found',
         });
       }
+      const passkeys = await this.passkeyModel.find({
+        user_id: user._id,
+      });
       const registrationOptions = await generateRegistrationOptions({
         rpName: this.configService.get<string>('APP_NAME'),
         rpID: 'localhost',
         userName: user.username,
         attestationType: 'none',
-        excludeCredentials: user.passkeys.map((passkey) => ({
+        excludeCredentials: passkeys.map((passkey) => ({
           id: passkey.credential_id,
           transports: passkey.transports as AuthenticatorTransportFuture[],
         })),
@@ -97,7 +100,7 @@ export class PasskeyService {
         { _id: userId },
         {
           $push: {
-            passkeys: passkey,
+            passkeys: passkey._id,
           },
         },
       );
@@ -161,14 +164,12 @@ export class PasskeyService {
     const passkey = await this.passkeyModel.findOne({
       user_id: userId,
     });
-
     if (!passkey) {
       throw new CustomHttpException('Passkey not found', HttpStatus.NOT_FOUND, {
         field: 'passkey',
         message: 'not-found',
       });
     }
-
     const verifyResponse = await verifyAuthenticationResponse({
       response: passkeyStartAuthenticationDto.response,
       expectedChallenge: passkeyStartAuthenticationDto.challenge,
@@ -186,5 +187,14 @@ export class PasskeyService {
       console.log('Passkey verified', verifyResponse);
       return verifyResponse;
     }
+
+    throw new CustomHttpException(
+      'Failed to verify authentication',
+      HttpStatus.BAD_REQUEST,
+      {
+        field: 'system-error',
+        message: 'system-error',
+      },
+    );
   }
 }
