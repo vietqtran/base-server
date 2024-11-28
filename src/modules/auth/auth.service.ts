@@ -232,7 +232,18 @@ export class AuthService {
     };
   }
 
-  private sanitizeUser(user: User): Partial<User> {
+  async getUserById(id: string) {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND, {
+        field: 'user',
+        message: 'not-found',
+      });
+    }
+    return this.sanitizeUser(user);
+  }
+
+  sanitizeUser(user: User): Partial<User> {
     const sanitizedUser = user;
     sanitizedUser.password_hash = undefined;
     sanitizedUser.sessions = undefined;
@@ -240,6 +251,7 @@ export class AuthService {
     sanitizedUser.is_active = undefined;
     sanitizedUser.verify_token = undefined;
     sanitizedUser.verify_token_expires_at = undefined;
+    sanitizedUser.passkeys = undefined;
     return sanitizedUser;
   }
 }

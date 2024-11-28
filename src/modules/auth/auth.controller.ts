@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -54,5 +55,10 @@ export class AuthController {
   @Public()
   async verify(@Body() verifyDto: VerifyDto) {
     return await this.authService.verify(verifyDto);
+  }
+
+  @Get('me')
+  async me(@CurrentUser() user: User) {
+    return await this.authService.getUserById(user._id);
   }
 }
